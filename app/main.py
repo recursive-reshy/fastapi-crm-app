@@ -4,24 +4,26 @@ from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app import __version__
+from app import __version__, __description__
+
+from .config import settings
 
 # Application instance
 app = FastAPI(
-  title = "CRM App",
-  description = "CRM App for managing customers and their interactions",
-  version = "0.1.0",
-  docs_url = "/docs",
-  redoc_url = "/redoc" # Redoc is an alternative to Swagger UI
+  title = settings.app_name,
+  description = __description__,
+  version = settings.app_version,
+  docs_url = settings.docs_url,
+  redoc_url = settings.redoc_url # Redoc is an alternative to Swagger UI
 )
 
 # CORS middleware
 app.add_middleware(
   CORSMiddleware,
-  allow_origins = [ "*" ], # TODO: Change to only allow specific origins
+  allow_origins = settings.allow_origins,
   allow_credentials = True,
-  allow_methods = [ "*" ],
-  allow_headers = [ "*" ]
+  allow_methods = [ "*" ], # TODO: Change to only allow specific methods
+  allow_headers = [ "*" ] # TODO: Change to only allow specific headers
 )
 
 # Health check
@@ -33,8 +35,10 @@ async def health_check():
   return {
     "status": "healthy",
     "timestamp": datetime.now().isoformat(),
-    "service": "crm-app",
-    "version": __version__
+    "service": settings.app_name,
+    "version": settings.app_version,
+    "environment": settings.env,
+    "debug": settings.debug
   }
 
 # Root
@@ -44,16 +48,18 @@ async def root():
   Root endpoint with basic application information
   """
   return {
-    "message": "CRM App",
-    "docs": "/docs",
-    "health": "/health"
+    "message": f"{settings.app_name} API",
+    "version": settings.app_version,
+    "environment": settings.env,
+    "docs": f"{settings.api_version_prefix}{settings.docs_url}",
+    "health": f"{settings.api_version_prefix}/health"
   }
 
 if __name__ == "__main__":
   uvicorn.run(
-    "app.main:app", # TODO: Check what this is
-    host = "0.0.0.0", # TODO: Take from environment variable
-    port = 8000, # TODO: Take from environment variable
-    reload = True, # TODO: Take from environment variable
-    log_level = "info" # TODO: Take from environment variable
+    "app.main:app", # Refers to main.py file and app variable
+    host = settings.app_host,
+    port = settings.app_port,
+    reload = settings.debug,
+    log_level = settings.log_level
   )
