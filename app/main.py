@@ -57,7 +57,7 @@ async def root():
 
 if __name__ == "__main__":
   uvicorn.run(
-    "app.main:app", # Refers to main.py file and app variable
+    "app.main:app", # Refers to main.py file and app variable ( app = FastAPI() )
     host = settings.app_host,
     port = settings.app_port,
     reload = settings.debug,
